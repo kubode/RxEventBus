@@ -1,0 +1,75 @@
+repositories {
+    jcenter()
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+dependencies {
+    compile 'io.reactivex:rxjava:1.1.0'
+    testCompile 'junit:junit:4.12'
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'RxEventBus'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Event bus with RxJava.'
+                url 'http://github.com/kubode/RxEventBus'
+
+                scm {
+                    connection 'scm:git:git://github.com/kubode/RxEventBus.git'
+                    developerConnection 'scm:git:git://github.com/kubode/RxEventBus.git'
+                    url 'http://github.com/kubode/RxEventBus'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'kubode'
+                        name 'Masatoshi Kubode'
+                        email 'swi.masatoshi@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
