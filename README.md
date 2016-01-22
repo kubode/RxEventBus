@@ -31,6 +31,8 @@ Post event.
 ```java
 bus.post(new MyEvent(42));
 // Output: 42
+bus.post(new OtherEvent(), { unhandledEvent -> System.out.println("unhandled") });
+// Output: unhandled
 ```
 
 
