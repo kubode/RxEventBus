@@ -9,19 +9,16 @@ import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
 /**
- * An implementation of event bus using {@link PublishSubject}.
- * <p/>
- * MT-Safe.
- * <p/>
- * Not support generics.
+ * <p>An implementation of event bus using {@link PublishSubject}.</p>
+ * <p>MT-Safe.</p>
+ * <p>Not support generics.</p>
  */
 public class RxEventBus {
     private final Subject<Event, Event> subject = new SerializedSubject<>(PublishSubject.<Event>create());
 
     /**
-     * Posts an {@link Event} to subscribed handlers.
-     * <p/>
-     * If no handlers have been subscribed for event's class, unhandled will be called with unhandled event.
+     * <p>Posts an {@link Event} to subscribed handlers.</p>
+     * <p>If no handlers have been subscribed for event's class, unhandled will be called with unhandled event.</p>
      *
      * @param <E>       Type of event.
      * @param event     An event to post.
@@ -36,7 +33,7 @@ public class RxEventBus {
     }
 
     /**
-     * An overload method of {@link #post(Event, Action1)} that do nothing on unhandled.
+     * <p>An overload method of {@link #post(Event, Action1)} that do nothing on unhandled.</p>
      *
      * @see #post(Event, Action1)
      */
@@ -49,14 +46,14 @@ public class RxEventBus {
     }
 
     /**
-     * Subscribes handler to receive events type of specified class.
-     * <p/>
-     * You should call {@link Subscription#unsubscribe()} if you want to stop receiving events.
+     * <p>Subscribes handler to receive events type of specified class.</p>
+     * <p>You should call {@link Subscription#unsubscribe()} if you want to stop receiving events.</p>
      *
      * @param <E>       Type of event.
      * @param clazz     Type of event that you want to receive.
      * @param handler   An event handler function that called if an event is posted.
      * @param scheduler handler will dispatched on this.
+     * @return A {@link Subscription} which can stop observing.
      */
     public <E extends Event> Subscription subscribe(Class<E> clazz, Action1<E> handler, Scheduler scheduler) {
         return subject
