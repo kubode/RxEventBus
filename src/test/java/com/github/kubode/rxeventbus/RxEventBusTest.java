@@ -58,6 +58,24 @@ public class RxEventBusTest {
     }
 
     @Test
+    public void post_unhandled_with_other_event() {
+        Event event = new UnhandledEvent();
+        Subscription subscription = bus.subscribe(MyEvent.class, new Action1<MyEvent>() {
+            @Override
+            public void call(MyEvent event) {
+                fail();
+            }
+        });
+        bus.post(event, new Action1<Event>() {
+            @Override
+            public void call(Event event) {
+                handledEvent = event;
+            }
+        });
+        assertEquals(handledEvent, event);
+    }
+
+    @Test
     public void post_handled() {
         Event event = new MyEvent(42);
         Subscription subscription = bus.subscribe(MyEvent.class, new Action1<MyEvent>() {
