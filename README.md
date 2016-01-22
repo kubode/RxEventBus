@@ -32,6 +32,8 @@ Subscribe handler.
 RxEventBus bus = new RxEventBus();
 // Do unsubscribe() on stop event handling.
 Subscription subscription = bus.subscribe(MyEvent.class, { event -> System.out.println(event.answer) });
+// Supports scheduler.
+bus.subscribe(MyEvent.class, { event -> System.out.println(event.answer) }, Schedulers.io());
 ```
 
 Post event.
