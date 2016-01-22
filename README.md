@@ -7,6 +7,14 @@ An event bus with RxJava.
 Usage
 ---
 
+Add dependency to `build.gradle`.
+
+```gradle
+dependencies {
+    compile 'com.github.kubode:rxeventbus:1.0.0'
+}
+```
+
 Define event class.
 
 ```java
