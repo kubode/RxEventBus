@@ -42,31 +42,34 @@ uploadArchives {
                 authentication(userName: ossrhUsername, password: ossrhPassword)
             }
 
-            pom.project {
-                name 'RxEventBus'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'Event bus with RxJava.'
-                url 'http://github.com/kubode/RxEventBus'
-
-                scm {
-                    connection 'scm:git:git://github.com/kubode/RxEventBus.git'
-                    developerConnection 'scm:git:git://github.com/kubode/RxEventBus.git'
+            pom {
+                artifactId = archivesBaseName
+                project {
+                    name 'RxEventBus'
+                    packaging 'jar'
+                    // optionally artifactId can be defined here
+                    description 'Event bus with RxJava.'
                     url 'http://github.com/kubode/RxEventBus'
-                }
 
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    scm {
+                        connection 'scm:git:git://github.com/kubode/RxEventBus.git'
+                        developerConnection 'scm:git:git://github.com/kubode/RxEventBus.git'
+                        url 'http://github.com/kubode/RxEventBus'
                     }
-                }
 
-                developers {
-                    developer {
-                        id 'kubode'
-                        name 'Masatoshi Kubode'
-                        email 'swi.masatoshi@gmail.com'
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'kubode'
+                            name 'Masatoshi Kubode'
+                            email 'swi.masatoshi@gmail.com'
+                        }
                     }
                 }
             }
