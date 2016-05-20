@@ -11,7 +11,7 @@ Add dependency to `build.gradle`.
 
 ```gradle
 dependencies {
-    compile 'com.github.kubode:rxeventbus:1.0.1'
+    compile 'com.github.kubode:rxeventbus:1.0.2'
 }
 ```
 
