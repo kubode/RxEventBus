@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.6'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'io.reactivex:rxjava:1.1.5'
+    testCompile 'junit:junit:4.12'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+bintray {
+    user = System.env.BINTRAY_USER ?: bintrayUser
+    key = System.env.BINTRAY_KEY ?: bintrayKey
+    publications = ['maven']
+    pkg {
+        repo = 'maven'
+        name = project.name
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/kubode/RxEventBus.git'
+        version.name = project.version
+    }
+}
