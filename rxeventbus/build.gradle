@@ -42,7 +42,7 @@ bintray {
     publications = ['maven']
     pkg {
         repo = 'maven'
-        name = project.name
+        name = "${project.group}:${project.name}"
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/kubode/RxEventBus.git'
         version.name = project.version
