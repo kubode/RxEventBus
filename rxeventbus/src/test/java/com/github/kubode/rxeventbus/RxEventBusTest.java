@@ -125,7 +125,7 @@ public class RxEventBusTest {
         assertNotNull(handledEvent);
     }
 
-    static class MyEvent extends Event {
+    private static class MyEvent extends Event {
         final int answer;
 
         MyEvent(int answer) {
@@ -133,6 +133,6 @@ public class RxEventBusTest {
         }
     }
 
-    static class UnhandledEvent extends Event {
+    private static class UnhandledEvent extends Event {
     }
 }
