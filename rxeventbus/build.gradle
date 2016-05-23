@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     compile 'io.reactivex:rxjava:1.1.5'
+    compile 'org.jetbrains:annotations:15.0'
     testCompile 'junit:junit:4.12'
 }
 

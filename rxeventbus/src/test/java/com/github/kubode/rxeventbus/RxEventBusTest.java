@@ -10,129 +10,149 @@ import rx.subscriptions.CompositeSubscription;
 import static org.junit.Assert.*;
 
 public class RxEventBusTest {
+
     private RxEventBus bus;
-    private Event handledEvent;
+
+    private final Action1<Event> handledAction = new Action1<Event>() {
+        @Override
+        public void call(Event event) {
+            event.handledCount++;
+        }
+    };
+    private final Action1<Event> unhandledAction = new Action1<Event>() {
+        @Override
+        public void call(Event event) {
+            event.unhandled = true;
+        }
+    };
 
     @Before
     public void setUp() {
         bus = new RxEventBus();
-        handledEvent = null;
     }
 
     @Test
     public void post_unhandled_do_nothing() {
-        Event event = new UnhandledEvent();
+        Event event = new Event();
         bus.post(event);
-        assertEquals(0, event.handledCount);
+        assertEquals(new Event(0, false), event);
     }
 
     @Test
     public void post_unhandled_call_unhandled_function() {
-        Event event = new UnhandledEvent();
-        bus.post(event, new Action1<Event>() {
-            @Override
-            public void call(Event event) {
-                handledEvent = event;
-            }
-        });
-        assertEquals(handledEvent, event);
+        Event event = new Event();
+        bus.post(event, unhandledAction);
+        assertEquals(new Event(0, true), event);
     }
 
     @Test
-    public void post_unhandled_with_unsubscribe() {
-        Event event = new UnhandledEvent();
-        Subscription subscription = bus.subscribe(UnhandledEvent.class, new Action1<UnhandledEvent>() {
-            @Override
-            public void call(UnhandledEvent event) {
-                fail();
-            }
-        });
+    public void post_unhandled_after_unsubscribe() {
+        Event event = new Event();
+        Subscription subscription = bus.subscribe(Event.class, new FailAction<Event>());
         subscription.unsubscribe();
-        bus.post(event, new Action1<Event>() {
-            @Override
-            public void call(Event event) {
-                handledEvent = event;
-            }
-        });
-        assertEquals(handledEvent, event);
+        bus.post(event, unhandledAction);
+        assertEquals(new Event(0, true), event);
     }
 
     @Test
     public void post_unhandled_with_other_event() {
-        Event event = new UnhandledEvent();
-        Subscription subscription = bus.subscribe(MyEvent.class, new Action1<MyEvent>() {
-            @Override
-            public void call(MyEvent event) {
-                fail();
-            }
-        });
-        bus.post(event, new Action1<Event>() {
-            @Override
-            public void call(Event event) {
-                handledEvent = event;
-            }
-        });
-        assertEquals(handledEvent, event);
+        Event event = new Event();
+        Subscription subscription = bus.subscribe(OtherEvent.class, new FailAction<OtherEvent>());
+        bus.post(event, unhandledAction);
+        subscription.unsubscribe();
+        assertEquals(new Event(0, true), event);
     }
 
     @Test
     public void post_handled() {
-        Event event = new MyEvent(42);
-        Subscription subscription = bus.subscribe(MyEvent.class, new Action1<MyEvent>() {
-            @Override
-            public void call(MyEvent event) {
-                handledEvent = event;
-            }
-        });
-        bus.post(event);
+        Event event = new Event();
+        Subscription subscription = bus.subscribe(Event.class, handledAction);
+        bus.post(event, new FailAction<Event>());
         subscription.unsubscribe();
-        assertEquals(handledEvent, event);
+        assertEquals(new Event(1, false), event);
     }
 
     @Test
     public void post_handled_2_times() {
-        Event event = new MyEvent(42);
-        Action1<MyEvent> handler = new Action1<MyEvent>() {
-            @Override
-            public void call(MyEvent event) {
-            }
-        };
-        Subscription subscription = new CompositeSubscription(bus.subscribe(MyEvent.class, handler), bus.subscribe(MyEvent.class, handler));
-        bus.post(event);
+        Event event = new Event();
+        Subscription subscription = new CompositeSubscription(
+                bus.subscribe(Event.class, handledAction),
+                bus.subscribe(Event.class, handledAction));
+        bus.post(event, new FailAction<Event>());
         subscription.unsubscribe();
-        assertEquals(2, event.handledCount);
+        assertEquals(new Event(2, false), event);
     }
 
     @Test
     public void post_handled_new_thread() throws InterruptedException {
+        final Event event = new Event();
         final Thread mainThread = Thread.currentThread();
         final Object lock = new Object();
-        Subscription subscription = bus.subscribe(MyEvent.class, new Action1<MyEvent>() {
+        Subscription subscription = bus.subscribe(Event.class, new Action1<Event>() {
             @Override
-            public void call(MyEvent event) {
+            public void call(Event handledEvent) {
                 assertNotEquals(mainThread, Thread.currentThread());
-                handledEvent = event;
+                assertEquals(event, handledEvent);
+                handledEvent.handledCount++;
                 synchronized (lock) {
                     lock.notifyAll();
                 }
             }
         }, Schedulers.newThread());
-        bus.post(new MyEvent(42));
+        bus.post(event, new FailAction<Event>());
         synchronized (lock) {
             lock.wait(1000);
         }
         subscription.unsubscribe();
-        assertNotNull(handledEvent);
+        assertEquals(new Event(1, false), event);
     }
 
-    private static class MyEvent extends Event {
-        final int answer;
+    private static class Event {
 
-        MyEvent(int answer) {
-            this.answer = answer;
+        int handledCount;
+        boolean unhandled;
+
+        Event() {
+            this(0, false);
+        }
+
+        Event(int handledCount, boolean unhandled) {
+            this.handledCount = handledCount;
+            this.unhandled = unhandled;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Event event = (Event) o;
+            if (handledCount != event.handledCount) return false;
+            return unhandled == event.unhandled;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = handledCount;
+            result = 31 * result + (unhandled ? 1 : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Event{" +
+                    "handledCount=" + handledCount +
+                    ", unhandled=" + unhandled +
+                    '}';
         }
     }
 
-    private static class UnhandledEvent extends Event {
+    private static class OtherEvent extends Event {
+    }
+
+    private static class FailAction<T> implements Action1<T> {
+        @Override
+        public void call(T t) {
+            fail();
+        }
     }
 }

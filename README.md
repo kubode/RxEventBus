@@ -3,7 +3,7 @@ RxEventBus
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.kubode/rxeventbus.svg?maxAge=2592000)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.kubode%22%20AND%20a%3A%22rxeventbus%22)
 
-An event bus with RxJava.
+Simple event bus using RxJava.
 
 
 Usage
@@ -13,16 +13,16 @@ Add dependency to `build.gradle`.
 
 ```gradle
 dependencies {
-    compile 'com.github.kubode:rxeventbus:1.0.2'
+    compile 'com.github.kubode:rxeventbus:${latestVersion}'
 }
 ```
 
 Define event class.
 
 ```java
-public class MyEvent extends Event {
+public class Event {
     public final int answer;
-    public MyEvent(int answer) {
+    public Event(int answer) {
         this.answer = answer;
     }
 }
@@ -32,19 +32,22 @@ Subscribe handler.
 
 ```java
 RxEventBus bus = new RxEventBus();
-// Do unsubscribe() on stop event handling.
-Subscription subscription = bus.subscribe(MyEvent.class, { event -> System.out.println(event.answer) });
+// Do unsubscribe() to stop event handling.
+Subscription subscription = bus.subscribe(Event.class, { event -> println(event.answer) });
+
 // Supports scheduler.
-bus.subscribe(MyEvent.class, { event -> System.out.println(event.answer) }, Schedulers.io());
+bus.subscribe(ScheduledEvent.class, { event -> println("scheduled") }, Schedulers.newThread());
 ```
 
 Post event.
 
 ```java
-bus.post(new MyEvent(42));
-// Output: 42
-bus.post(new OtherEvent(), { unhandledEvent -> System.out.println("unhandled") });
-// Output: unhandled
+bus.post(new Event(42));
+// prints: 42
+
+// Can detect unhandled.
+bus.post(new OtherEvent(), { unhandledEvent -> println("unhandled") });
+// prints: unhandled
 ```
 
 

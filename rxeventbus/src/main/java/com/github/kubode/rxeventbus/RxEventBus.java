@@ -1,67 +1,83 @@
 package com.github.kubode.rxeventbus;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * <p>An implementation of event bus using {@link PublishSubject}.</p>
- * <p>MT-Safe.</p>
- * <p>Not support generics.</p>
+ * Simple event bus using {@link PublishSubject}.
+ * <p>
+ * Notes:
+ * <ul>
+ * <li>MT-Safe.</li>
+ * <li>Not supports generics.</li>
+ * </ul>
  */
 public class RxEventBus {
-    private final Subject<Event, Event> subject = new SerializedSubject<>(PublishSubject.<Event>create());
+
+    private final Subject<Object, Object> subject = new SerializedSubject<>(PublishSubject.create());
+    private final Map<Class, Integer> classRefCounts = new HashMap<>();
 
     /**
-     * <p>Posts an {@link Event} to subscribed handlers.</p>
-     * <p>If no handlers have been subscribed for event's class, unhandled will be called with unhandled event.</p>
+     * Post an event to subscribed handlers.
+     * It can detect event is not handled.
      *
-     * @param <E>       Type of event.
+     * @param <E>       Type of {@code event}.
      * @param event     An event to post.
-     * @param unhandled Will be called if event is not handled.
-     *                  Note: If handler subscribed by using async {@link Scheduler}, it can't guarantee event is actually handled.
+     * @param unhandled It will be called if {@code event} is not handled.
+     *                  Note: If handler subscribed by using async {@link Scheduler}, it can't guarantee {@code event} is actually handled.
      */
-    public <E extends Event> void post(E event, Action1<E> unhandled) {
-        subject.onNext(event);
-        if (event.handledCount == 0) {
-            unhandled.call(event);
+    public <E> void post(@NotNull E event, @Nullable Action1<E> unhandled) {
+        if (getRefCount(event.getClass()) > 0) {
+            subject.onNext(event);
+        } else {
+            if (unhandled != null) {
+                unhandled.call(event);
+            }
         }
     }
 
     /**
-     * <p>An overload method of {@link #post(Event, Action1)} that do nothing on unhandled.</p>
+     * Post an event to subscribed handlers.
+     * Do nothing on unhandled.</p>
      *
-     * @see #post(Event, Action1)
+     * @param <E>   Type of {@code event}.
+     * @param event An event to post.
+     * @see #post(E, Action1)
      */
-    public <E extends Event> void post(E event) {
-        post(event, new Action1<E>() {
-            @Override
-            public void call(E e) {
-            }
-        });
+    public <E> void post(@NotNull E event) {
+        post(event, null);
     }
 
     /**
-     * <p>Subscribes handler to receive events type of specified class.</p>
-     * <p>You should call {@link Subscription#unsubscribe()} if you want to stop receiving events.</p>
+     * Subscribe {@code handler} to receive events type of specified class.
+     * <p>
+     * You should call {@link Subscription#unsubscribe()} if you want to stop receiving events.
      *
-     * @param <E>       Type of event.
+     * @param <E>       Type of {@code event}.
      * @param clazz     Type of event that you want to receive.
-     * @param handler   An event handler function that called if an event is posted.
-     * @param scheduler handler will dispatched on this.
-     * @return A {@link Subscription} which can stop observing.
+     * @param handler   It will be called when {@code clazz} and the same type of events were posted.
+     * @param scheduler {@code handler} will dispatched to this scheduler.
+     * @return A {@link Subscription} which can stop observing by calling {@link Subscription#unsubscribe()}.
      */
-    public <E extends Event> Subscription subscribe(Class<E> clazz, Action1<E> handler, Scheduler scheduler) {
+    public <E> Subscription subscribe(@NotNull final Class<E> clazz, @NotNull Action1<E> handler, @NotNull Scheduler scheduler) {
+        incrementRefCount(clazz);
         return subject
                 .ofType(clazz)
-                .doOnNext(new Action1<E>() {
+                .doOnUnsubscribe(new Action0() {
                     @Override
-                    public void call(E e) {
-                        e.handledCount++;
+                    public void call() {
+                        decrementRefCount(clazz);
                     }
                 })
                 .observeOn(scheduler)
@@ -69,11 +85,37 @@ public class RxEventBus {
     }
 
     /**
-     * An overload method of {@link #subscribe(Class, Action1, Scheduler)} that scheduler specified by {@link Schedulers#immediate()}
+     * Subscribe {@code handler} to receive events type of specified class.
+     * <p>
+     * Handler scheduled by {@link Schedulers#immediate()}
      *
      * @see #subscribe(Class, Action1, Scheduler)
      */
-    public <E extends Event> Subscription subscribe(Class<E> clazz, Action1<E> handler) {
+    public <E> Subscription subscribe(@NotNull Class<E> clazz, @NotNull Action1<E> handler) {
         return subscribe(clazz, handler, Schedulers.immediate());
+    }
+
+    private synchronized int getRefCount(Class clazz) {
+        if (classRefCounts.containsKey(clazz)) {
+            return classRefCounts.get(clazz);
+        } else {
+            return 0;
+        }
+    }
+
+    private synchronized void setRefCount(Class clazz, int refCount) {
+        if (refCount == 0) {
+            classRefCounts.remove(clazz);
+        } else {
+            classRefCounts.put(clazz, refCount);
+        }
+    }
+
+    private synchronized void incrementRefCount(Class clazz) {
+        setRefCount(clazz, getRefCount(clazz) + 1);
+    }
+
+    private synchronized void decrementRefCount(Class clazz) {
+        setRefCount(clazz, getRefCount(clazz) - 1);
     }
 }
