@@ -49,11 +49,11 @@ public class RxEventBus {
 
     /**
      * Post an event to subscribed handlers.
-     * Do nothing on unhandled.</p>
+     * Do nothing on unhandled.
      *
      * @param <E>   Type of {@code event}.
      * @param event An event to post.
-     * @see #post(E, Action1)
+     * @see #post(Object, Action1)
      */
     public <E> void post(@NotNull E event) {
         post(event, null);
@@ -89,6 +89,10 @@ public class RxEventBus {
      * <p>
      * Handler scheduled by {@link Schedulers#immediate()}
      *
+     * @param <E>     Type of {@code event}.
+     * @param clazz   Type of event that you want to receive.
+     * @param handler It will be called when {@code clazz} and the same type of events were posted.
+     * @return A {@link Subscription} which can stop observing by calling {@link Subscription#unsubscribe()}.
      * @see #subscribe(Class, Action1, Scheduler)
      */
     public <E> Subscription subscribe(@NotNull Class<E> clazz, @NotNull Action1<E> handler) {
