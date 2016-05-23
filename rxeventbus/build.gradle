@@ -4,6 +4,8 @@ plugins {
     id 'com.jfrog.bintray' version '1.6'
 }
 
+description 'Simple event bus using RxJava.'
+
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
@@ -44,13 +46,6 @@ bintray {
     pkg {
         repo = 'maven'
         name = "${project.group}:${project.name}"
-        licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/kubode/RxEventBus'
-        issueTrackerUrl = 'https://github.com/kubode/RxEventBus/issues'
-        vcsUrl = 'https://github.com/kubode/RxEventBus.git'
         version.name = project.version
-
-        githubRepo = 'kubode/RxEventBus'
-        githubReleaseNotesFile = 'CHANGELOG.md'
     }
 }
