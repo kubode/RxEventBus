@@ -1,3 +1,8 @@
+Version 1.1.0
+---
+* `RxEventBus` can post any type.
+* `Event` is deprecated. It will removed since 1.2.0.
+
 Version 1.0.2
 ---
 * Update RxJava to 1.1.5.
