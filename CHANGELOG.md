@@ -1,3 +1,7 @@
+Version 1.1.2
+---
+* Fix proguard issue.
+
 Version 1.1.1
 ---
 * Fix build failure on Android.
