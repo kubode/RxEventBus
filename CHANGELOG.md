@@ -1,3 +1,7 @@
+Version 1.1.1
+---
+* Fix build failure on Android.
+
 Version 1.1.0
 ---
 * `RxEventBus` can post any type.

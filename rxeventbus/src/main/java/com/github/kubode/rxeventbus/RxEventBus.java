@@ -1,7 +1,5 @@
 package com.github.kubode.rxeventbus;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.functions.Action0;
@@ -11,6 +9,8 @@ import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class RxEventBus {
      * @param unhandled It will be called if {@code event} is not handled.
      *                  Note: If handler subscribed by using async {@link Scheduler}, it can't guarantee {@code event} is actually handled.
      */
-    public <E> void post(@NotNull E event, @Nullable Action1<E> unhandled) {
+    public <E> void post(@Nonnull E event, @Nullable Action1<E> unhandled) {
         if (getRefCount(event.getClass()) > 0) {
             subject.onNext(event);
         } else {
@@ -55,7 +55,7 @@ public class RxEventBus {
      * @param event An event to post.
      * @see #post(Object, Action1)
      */
-    public <E> void post(@NotNull E event) {
+    public <E> void post(@Nonnull E event) {
         post(event, null);
     }
 
@@ -70,7 +70,7 @@ public class RxEventBus {
      * @param scheduler {@code handler} will dispatched to this scheduler.
      * @return A {@link Subscription} which can stop observing by calling {@link Subscription#unsubscribe()}.
      */
-    public <E> Subscription subscribe(@NotNull final Class<E> clazz, @NotNull Action1<E> handler, @NotNull Scheduler scheduler) {
+    public <E> Subscription subscribe(@Nonnull final Class<E> clazz, @Nonnull Action1<E> handler, @Nonnull Scheduler scheduler) {
         incrementRefCount(clazz);
         return subject
                 .ofType(clazz)
@@ -95,7 +95,7 @@ public class RxEventBus {
      * @return A {@link Subscription} which can stop observing by calling {@link Subscription#unsubscribe()}.
      * @see #subscribe(Class, Action1, Scheduler)
      */
-    public <E> Subscription subscribe(@NotNull Class<E> clazz, @NotNull Action1<E> handler) {
+    public <E> Subscription subscribe(@Nonnull Class<E> clazz, @Nonnull Action1<E> handler) {
         return subscribe(clazz, handler, Schedulers.immediate());
     }
 
