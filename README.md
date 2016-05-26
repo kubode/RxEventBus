@@ -12,6 +12,9 @@ Usage
 Add dependency to `build.gradle`.
 
 ```gradle
+repositories {
+    jcenter()
+}
 dependencies {
     compile 'com.github.kubode:rxeventbus:${latestVersion}'
 }
