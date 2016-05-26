@@ -1,7 +1,7 @@
 RxEventBus
 ===
 
-[![Bintray](https://img.shields.io/bintray/v/kubode/maven/com.github.kubode:rxeventbus.svg?maxAge=2592000)](https://bintray.com/kubode/maven/com.github.kubode%3Arxeventbus/view)
+[![GitHub release](https://img.shields.io/github/release/kubode/RxEventBus.svg?maxAge=2592000)]()
 
 Simple event bus using RxJava.
 
