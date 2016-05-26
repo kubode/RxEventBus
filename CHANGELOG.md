@@ -1,3 +1,7 @@
+Version 1.2.0
+---
+* Remove `Event` class.
+
 Version 1.1.2
 ---
 * Fix proguard issue.
