@@ -2,6 +2,7 @@ RxEventBus
 ===
 
 [![GitHub release](https://img.shields.io/github/release/kubode/RxEventBus.svg?maxAge=2592000)]()
+[![Travis](https://img.shields.io/travis/kubode/RxEventBus.svg?maxAge=2592000)]()
 
 Simple event bus using RxJava.
 
