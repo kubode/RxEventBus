@@ -1,10 +1,12 @@
 RxEventBus
 ===
 
+Simple event bus using RxJava.
+
 [![GitHub release](https://img.shields.io/github/release/kubode/RxEventBus.svg?maxAge=2592000)]()
 [![Build Status](https://travis-ci.org/kubode/RxEventBus.svg?branch=master)](https://travis-ci.org/kubode/RxEventBus)
-
-Simple event bus using RxJava.
+[![codecov](https://codecov.io/gh/kubode/RxEventBus/branch/master/graph/badge.svg)](https://codecov.io/gh/kubode/RxEventBus)
+[![license](https://img.shields.io/github/license/kubode/RxEventBus.svg?maxAge=2592000)]()
 
 
 Usage
